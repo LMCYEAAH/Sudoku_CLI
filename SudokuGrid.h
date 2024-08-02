@@ -42,9 +42,12 @@ class SudokuGrid {
         void                setPossibleValuesBasedOnAdjacent(int row, int col);
         std::vector<int>    getPossibleValuesAtBlock(int row, int col);
         void                setPossibleValuesAtBlock(int row, int col, std::vector<int> vec);
-        void                removeCommonPossibleValuesAtRow(int row);
-        void                removeCommonPossibleValuesAtColumn(int col);
-        void                removeCommonPossibleValuesAtSquare(int square);
+        void                isolateUncommonPossibleValueAtRow(int row);
+        void                isolateUncommonPossibleValueAtColumn(int col);
+        void                isolateUncommonPossibleValueAtSquare(int square);
+        void                removeCommonPossibleValuesAtRow(int row, bool checkForSubsets);
+        void                removeCommonPossibleValuesAtColumn(int col, bool checkForSubsets);
+        void                removeCommonPossibleValuesAtSquare(int square, bool checkForSubsets);
         void                removeValuesFromBlock(int row, int col, std::vector<int> vec);
         void                scanGridForPossibleValues(bool fillBlocks);
         void                fillBlocksBasedOnPossibleValues();

@@ -1,6 +1,22 @@
 #include "SudokuGrid.h"
 
 
+bool isBSubsetOfA(std::vector<int> vecSet, std::vector<int> vecPossibleSubset) {
+    int vecSize = vecSet.size();
+    int subSize = vecPossibleSubset.size();
+    if(vecSize < subSize) return false;
+    int commonCount = 0;
+    for(int i = 0; i < subSize; i++) {
+        for(int j = 0; j < vecSize; j++) {
+            if(vecPossibleSubset[i] == vecSet[j]) {
+                commonCount++;
+                break;
+            }
+        }
+    }
+
+    return commonCount == subSize ? true : false;
+}
 
 void SudokuGrid::Init(std::vector<std::vector<int>> vec)
 {
@@ -136,7 +152,22 @@ void SudokuGrid::removeValuesFromBlock(int row, int col, std::vector<int> vec)
     setPossibleValuesAtBlock(row, col, possibleValues);
 }
 
-void SudokuGrid::removeCommonPossibleValuesAtRow(int row)
+void SudokuGrid::isolateUncommonPossibleValueAtRow(int row)
+{
+
+}
+
+void SudokuGrid::isolateUncommonPossibleValueAtColumn(int col)
+{
+
+}
+
+void SudokuGrid::isolateUncommonPossibleValueAtSquare(int square)
+{
+
+}
+
+void SudokuGrid::removeCommonPossibleValuesAtRow(int row, bool checkForSubsets)
 {
     // Row investigate
     std::vector<int> commonIndexes;
@@ -145,14 +176,22 @@ void SudokuGrid::removeCommonPossibleValuesAtRow(int row)
         if(getValueAtBlock(row, startingIndex) > 0) continue;
         commonIndexes.clear();
         for(int i = 0; i < GRID_COL_COUNT; i++) {
-            // if(i == startingIndex) continue;
             if(getValueAtBlock(row,i) > 0) continue;
-            if(getPossibleValuesAtBlock(row,i) == getPossibleValuesAtBlock(row, startingIndex)) {
-                commonIndexes.push_back(i);
+            if(checkForSubsets) {
+                if(getPossibleValuesAtBlock(row,i) == getPossibleValuesAtBlock(row, startingIndex) || 
+                isBSubsetOfA(getPossibleValuesAtBlock(row,startingIndex),getPossibleValuesAtBlock(row,i))) {
+                    commonIndexes.push_back(i);
+                }
+            } else {
+                if(getPossibleValuesAtBlock(row,i) == getPossibleValuesAtBlock(row, startingIndex)) {
+                    commonIndexes.push_back(i);
+                }
             }
+
         }
         int commonIndexSize = commonIndexes.size();
         bool isCommonIndex = false;
+ 
         #ifdef _DEBUG
         std::cout << "Common Indexes at startingIndex = " << startingIndex << ": ";
         for(int index_i = 0; index_i < commonIndexSize; index_i++) {
@@ -160,7 +199,16 @@ void SudokuGrid::removeCommonPossibleValuesAtRow(int row)
         }
         std::cout << std::endl;
         #endif
-        if(getPossibleValuesAtBlock(row,startingIndex).size() == commonIndexSize) {
+        
+        // Find largest Possible values list in common indexes
+        int maxSize = 0;
+        if(commonIndexSize > 0) maxSize = getPossibleValuesAtBlock(row,commonIndexes[0]).size();
+        for(int common_i = 0; common_i < commonIndexSize; common_i++) {
+            if(getPossibleValuesAtBlock(row,commonIndexes[common_i]).size() > maxSize)
+                maxSize = getPossibleValuesAtBlock(row,commonIndexes[common_i]).size();
+        }
+
+        if(maxSize == commonIndexSize) {
             for(int j = 0; j < GRID_COL_COUNT; j++) {
                 isCommonIndex = false;
                 for(int k = 0; k < commonIndexSize; k++) {
@@ -175,7 +223,7 @@ void SudokuGrid::removeCommonPossibleValuesAtRow(int row)
         }
     }
 }
-void SudokuGrid::removeCommonPossibleValuesAtColumn(int col)
+void SudokuGrid::removeCommonPossibleValuesAtColumn(int col, bool checkForSubsets)
 {
     // Column investigate
     std::vector<int> commonIndexes;
@@ -186,12 +234,20 @@ void SudokuGrid::removeCommonPossibleValuesAtColumn(int col)
         for(int i = 0; i < GRID_ROW_COUNT; i++) {
             // if(i == startingIndex) continue;
             if(getValueAtBlock(i,col) > 0) continue;
-            if(getPossibleValuesAtBlock(i,col) == getPossibleValuesAtBlock(startingIndex, col)) {
-                commonIndexes.push_back(i);
+            if(checkForSubsets) {
+               if(getPossibleValuesAtBlock(i,col) == getPossibleValuesAtBlock(startingIndex, col) ||
+                  isBSubsetOfA(getPossibleValuesAtBlock(startingIndex, col),getPossibleValuesAtBlock(i,col))) {
+                    commonIndexes.push_back(i);
+                }
+            } else {
+                if(getPossibleValuesAtBlock(i,col) == getPossibleValuesAtBlock(startingIndex, col)) {
+                    commonIndexes.push_back(i);
+                }
             }
         }
         int commonIndexSize = commonIndexes.size();
         bool isCommonIndex = false;
+
         #ifdef _DEBUG
         std::cout << "Common Indexes at startingIndex = " << startingIndex << ": ";
         for(int index_i = 0; index_i < commonIndexSize; index_i++) {
@@ -199,7 +255,16 @@ void SudokuGrid::removeCommonPossibleValuesAtColumn(int col)
         }
         std::cout << std::endl;
         #endif
-        if(getPossibleValuesAtBlock(startingIndex, col).size() == commonIndexSize) {
+
+        // Find largest Possible values list in common indexes
+        int maxSize = 0;
+        if(commonIndexSize > 0) maxSize = getPossibleValuesAtBlock(commonIndexes[0], col).size();
+        for(int common_i = 0; common_i < commonIndexSize; common_i++) {
+            if(getPossibleValuesAtBlock(commonIndexes[common_i], col).size() > maxSize)
+                maxSize = getPossibleValuesAtBlock(commonIndexes[common_i], col).size();
+        }
+
+        if(maxSize == commonIndexSize) {
             for(int j = 0; j < GRID_ROW_COUNT; j++) {
                 isCommonIndex = false;
                 for(int k = 0; k < commonIndexSize; k++) {
@@ -214,7 +279,7 @@ void SudokuGrid::removeCommonPossibleValuesAtColumn(int col)
         }
     }
 }
-void SudokuGrid::removeCommonPossibleValuesAtSquare(int square)
+void SudokuGrid::removeCommonPossibleValuesAtSquare(int square, bool checkForSubsets)
 {
             // Check Square
         std::vector<std::vector<int>> commonPairs;
@@ -233,32 +298,49 @@ void SudokuGrid::removeCommonPossibleValuesAtSquare(int square)
             for(int startingCol = squareCol; startingCol < squareCol + 3; startingCol++) {
                 commonPairs.clear();
                 if(getValueAtBlock(startingRow, startingCol) > 0) continue;
+
                 for(int i = squareRow; i < squareRow + 3; i++) {
                     for(int j = squareCol; j < squareCol + 3; j++) {
                         if(getValueAtBlock(i,j) > 0) continue;
-                        if(getPossibleValuesAtBlock(i,j) == getPossibleValuesAtBlock(startingRow,startingCol)) {
-                            commonPairs.push_back(std::vector({i,j}));
+                        if(checkForSubsets) {
+                            if(getPossibleValuesAtBlock(i,j) == getPossibleValuesAtBlock(startingRow,startingCol) ||
+                            isBSubsetOfA(getPossibleValuesAtBlock(startingRow,startingCol),getPossibleValuesAtBlock(i,j))) {
+                                commonPairs.push_back(std::vector({i,j}));
+                            }
+                        } else {
+                            if(getPossibleValuesAtBlock(i,j) == getPossibleValuesAtBlock(startingRow,startingCol)) {
+                                commonPairs.push_back(std::vector({i,j}));
+                            }
                         }
                     }
-                    commonPairsSize = commonPairs.size();
-                    if(getPossibleValuesAtBlock(startingRow, startingCol).size() == commonPairsSize) {
-                        for(int k = squareRow; k < squareRow + 3; k++) {
-                            for(int m = squareCol; m < squareCol + 3; m++) {
-                                isCommonPair = false;
-                                for(int n = 0; n < commonPairsSize; n++) {
-                                    if(std::vector<int>({k,m}) == commonPairs[n]) {
-                                    isCommonPair = true;
-                                    break;
-                                    }
+                }
+
+                commonPairsSize = commonPairs.size();
+
+                // Find largest Possible values list in common indexes
+                int maxSize = 0;
+                if(commonPairsSize > 0) maxSize = getPossibleValuesAtBlock(commonPairs[0][0],commonPairs[0][1]).size();
+                for(int common_i = 0; common_i < commonPairsSize; common_i++) {
+                    if(getPossibleValuesAtBlock(commonPairs[common_i][0], commonPairs[common_i][1]).size() > maxSize)
+                        maxSize = getPossibleValuesAtBlock(commonPairs[common_i][0], commonPairs[common_i][1]).size();
+                }
+                if(maxSize == commonPairsSize) {
+                    for(int k = squareRow; k < squareRow + 3; k++) {
+                        for(int m = squareCol; m < squareCol + 3; m++) {
+                            isCommonPair = false;
+                            for(int n = 0; n < commonPairsSize; n++) {
+                                if(std::vector<int>({k,m}) == commonPairs[n]) {
+                                isCommonPair = true;
+                                break;
                                 }
-                                if(isCommonPair) continue;
-                                #ifdef _DEBUG
-                                std::cout << "Uncommon pair for:";
-                                displayPossibleValuesAtBlock(commonPairs[0][0],commonPairs[0][1]);
-                                std::cout << "(" << k << "," << m << ")\r\n";
-                                #endif
-                                removeValuesFromBlock(k, m, getPossibleValuesAtBlock(commonPairs[0][0], commonPairs[0][1]));
                             }
+                            if(isCommonPair) continue;
+                            #ifdef _DEBUG
+                            std::cout << "Uncommon pair for:";
+                            displayPossibleValuesAtBlock(commonPairs[0][0],commonPairs[0][1]);
+                            std::cout << "(" << k << "," << m << ")\r\n";
+                            #endif
+                            removeValuesFromBlock(k, m, getPossibleValuesAtBlock(startingRow, startingCol));
                         }
                     }
                 }
@@ -504,11 +586,14 @@ int SudokuGrid::solveGrid()
         std::cout << "SOLVED AFTER " << scanCount << " SCANS!" << std::endl;
         displayGrid();
     } else {
+        #ifdef _DEBUG
         std::cout << "NOT SOLVED AFTER " << scanCount << " SCANS..." << std::endl;
         displaySolvedBlockCount();
         displayGrid();
+        displayAllPossibleValues(SQUARE);
         std::cout << "Attempting extra algorithms...\r\n";
-        scanCount = 0;
+        #endif
+        // scanCount = 0;
         prevSolvedCount = -1;
         while(scanCount < MAX_SCAN_COUNT) {
             if(prevSolvedCount == solvedBlockCount()) {
@@ -516,10 +601,18 @@ int SudokuGrid::solveGrid()
             }
             prevSolvedCount = solvedBlockCount();
             for(int k = 0; k < GRID_SQUARE_COUNT; k++) {
-                removeCommonPossibleValuesAtRow(k);
-                removeCommonPossibleValuesAtColumn(k);
-                removeCommonPossibleValuesAtSquare(k);
+                removeCommonPossibleValuesAtRow(k, false);
+                removeCommonPossibleValuesAtColumn(k, false);
+                removeCommonPossibleValuesAtSquare(k, false);
+
                 fillBlocksBasedOnPossibleValues();
+
+                removeCommonPossibleValuesAtRow(k,true);
+                removeCommonPossibleValuesAtColumn(k,true);
+                removeCommonPossibleValuesAtSquare(k,true);
+
+                fillBlocksBasedOnPossibleValues();
+                scanGridForPossibleValues(true);
             }
             scanCount++;
             if(isSolved()) break;
@@ -529,13 +622,13 @@ int SudokuGrid::solveGrid()
         } else {
             std::cout << "Not solved after " << scanCount << " attempts...\r\n";
         }
-         std::cout << "Solved Blocks Count = " << solvedBlockCount() << std::endl;
-         displayGrid();
-         displayAllPossibleValues(SQUARE);
+        displaySolvedBlockCount();
+        displayGrid();
+        displayAllPossibleValues(SQUARE);
     }
     return 0;
 }
-k
+
 std::vector<std::vector<int>> SudokuGrid::hardCodedPuzzle()
 {
     std::vector<std::vector<int>> vect(9,{0,0,0,0,0,0,0,0,0});
