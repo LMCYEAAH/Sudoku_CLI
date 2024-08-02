@@ -11,6 +11,12 @@
 #define GRID_COL_COUNT 9
 #define GRID_SQUARE_COUNT 9
 
+enum displayByEnum {
+    ROW,
+    COLUMN,
+    SQUARE
+};
+
 class SudokuGrid {
     public:
         void                Init(std::vector<std::vector<int>> vec);
@@ -18,7 +24,7 @@ class SudokuGrid {
                             SudokuGrid(std::vector<std::vector<int>> vec);
                             SudokuGrid(std::string filePath);
         void                displayPossibleValuesAtBlock(int row, int col);
-        void                displayAllPossibleValues();
+        void                displayAllPossibleValues(displayByEnum displayBy);
         void                displayGrid();
         int                 solveGrid();
         bool                isSolved();

@@ -223,7 +223,7 @@ void SudokuGrid::removeCommonPossibleValuesAtSquare(int square)
 
         if(square < 3) { squareRow = 0; }
         else if(square < 6) { squareRow = 3; }
-        else { square = 6; }
+        else { squareRow = 6; }
 
         if(square%3 == 0) { squareCol = 0; }
         else if(square%3 == 1) { squareCol = 3; }
@@ -231,6 +231,7 @@ void SudokuGrid::removeCommonPossibleValuesAtSquare(int square)
 
         for(int startingRow = squareRow; startingRow < squareRow + 3; startingRow++) {
             for(int startingCol = squareCol; startingCol < squareCol + 3; startingCol++) {
+                commonPairs.clear();
                 if(getValueAtBlock(startingRow, startingCol) > 0) continue;
                 for(int i = squareRow; i < squareRow + 3; i++) {
                     for(int j = squareCol; j < squareCol + 3; j++) {
@@ -248,10 +249,15 @@ void SudokuGrid::removeCommonPossibleValuesAtSquare(int square)
                                     if(std::vector<int>({k,m}) == commonPairs[n]) {
                                     isCommonPair = true;
                                     break;
+                                    }
                                 }
                                 if(isCommonPair) continue;
-                                removeValuesFromBlock(k, m, getPossibleValuesAtBlock(startingRow, startingCol));
-                                }
+                                #ifdef _DEBUG
+                                std::cout << "Uncommon pair for:";
+                                displayPossibleValuesAtBlock(commonPairs[0][0],commonPairs[0][1]);
+                                std::cout << "(" << k << "," << m << ")\r\n";
+                                #endif
+                                removeValuesFromBlock(k, m, getPossibleValuesAtBlock(commonPairs[0][0], commonPairs[0][1]));
                             }
                         }
                     }
@@ -352,13 +358,70 @@ void SudokuGrid::displayPossibleValuesAtBlock(int row, int col)
     }
 }
 
-void SudokuGrid::displayAllPossibleValues()
+void SudokuGrid::displayAllPossibleValues(displayByEnum displayBy)
 {
-    for(int i = 0; i < GRID_ROW_COUNT; i++) {
-        for(int j = 0; j < GRID_COL_COUNT; j++) {
-            if(getValueAtBlock(i,j) == 0) displayPossibleValuesAtBlock(i,j);
-        }
+    int blockCount;
+    switch(displayBy)
+    {
+        case ROW:
+            for(int i = 0; i < GRID_ROW_COUNT; i++) {
+                blockCount = 0;
+                for(int j = 0; j < GRID_COL_COUNT; j++) {
+                    if(getValueAtBlock(i,j) == 0) {
+                        if(blockCount == 0) {
+                            std::cout << "Row " << i + 1 << "\r\n";
+                        }
+                        blockCount++;
+                        displayPossibleValuesAtBlock(i,j);
+                    }
+                }
+            }
+            break;
+        case COLUMN:
+            for(int j = 0; j < GRID_COL_COUNT; j++) {
+                blockCount = 0;
+                for(int i = 0; i < GRID_ROW_COUNT; i++) {
+                    if(getValueAtBlock(i,j) == 0) {
+                        if(blockCount == 0) {
+                        std::cout << "Column " << j + 1 << "\r\n";
+                        }
+                        blockCount++;
+                        displayPossibleValuesAtBlock(i,j);
+                    }
+                }
+            }
+            break;
+        case SQUARE:
+            int squareRow, squareCol;
+            for(int square = 0; square < GRID_SQUARE_COUNT; square++) {
+                blockCount = 0;
+
+                if(square < 3) { squareRow = 0; }
+                else if(square < 6) { squareRow = 3; }
+                else { squareRow = 6; }
+
+                if(square%3 == 0) { squareCol = 0; }
+                else if(square%3 == 1) { squareCol = 3; }
+                else { squareCol = 6; }
+
+                for(int i = squareRow; i < squareRow + 3; i++) {
+                    for(int j = squareCol; j < squareCol + 3; j++) {
+                        if(getValueAtBlock(i,j) == 0) {
+                            if(blockCount == 0) {
+                                 std::cout << "Square " << square + 1 << "\r\n";
+                            }
+                            blockCount++;
+                            displayPossibleValuesAtBlock(i,j);
+                        }
+                    }   
+                }
+                if(blockCount > 0) {
+
+                }
+            }
+            break;
     }
+
 }
 
 void SudokuGrid::scanGridForPossibleValues(bool fillBlocks)
@@ -439,26 +502,37 @@ int SudokuGrid::solveGrid()
 
     if(isSolved()) {
         std::cout << "SOLVED AFTER " << scanCount << " SCANS!" << std::endl;
+        displayGrid();
     } else {
         std::cout << "NOT SOLVED AFTER " << scanCount << " SCANS..." << std::endl;
         displaySolvedBlockCount();
-        // std::cout << "Solved Blocks Count = " << solvedBlockCount() << std::endl;
+        displayGrid();
+        std::cout << "Attempting extra algorithms...\r\n";
+        scanCount = 0;
+        prevSolvedCount = -1;
+        while(scanCount < MAX_SCAN_COUNT) {
+            if(prevSolvedCount == solvedBlockCount()) {
+            break;
+            }
+            prevSolvedCount = solvedBlockCount();
+            for(int k = 0; k < GRID_SQUARE_COUNT; k++) {
+                removeCommonPossibleValuesAtRow(k);
+                removeCommonPossibleValuesAtColumn(k);
+                removeCommonPossibleValuesAtSquare(k);
+                fillBlocksBasedOnPossibleValues();
+            }
+            scanCount++;
+            if(isSolved()) break;
+        }
+        if(isSolved()) {
+            std::cout << "Solved!\r\n";
+        } else {
+            std::cout << "Not solved after " << scanCount << " attempts...\r\n";
+        }
+         std::cout << "Solved Blocks Count = " << solvedBlockCount() << std::endl;
+         displayGrid();
+         displayAllPossibleValues(SQUARE);
     }
-
-    displayGrid();
-    std::cout << std::endl;
-
-    // displayAllPossibleValues();
-    // removeCommonPossibleValuesAtRow(0);
-    removeCommonPossibleValuesAtSquare(5);
-    // fillBlocksBasedOnPossibleValues();
-
-    std::cout << "Next algorithm!" << std::endl;
-    displaySolvedBlockCount();
-    // std::cout << "solved Blocks Count = " << solvedBlockCount() << std::endl;
-    displayGrid();
-    // displayAllPossibleValues();
-
     return 0;
 }
 
