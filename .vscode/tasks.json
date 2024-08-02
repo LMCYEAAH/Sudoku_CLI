@@ -1,0 +1,36 @@
+{
+  "tasks": [
+    {
+      "type": "cppbuild",
+      "label": "C/C++: g++ build files",
+      "command": "/usr/bin/g++",
+      "args": [
+        "-fdiagnostics-color=always",
+        "-g",
+        "${workspaceFolder}/main.cpp",
+        "${workspaceFolder}/SudokuGrid.cpp",
+        "${workspaceFolder}/Block.cpp",
+        "-o",
+        "${workspaceFolder}/a.out"
+      ],
+      "options": {
+        "cwd": "${fileDirname}"
+      },
+      "problemMatcher": ["$gcc"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false,
+        "close": false
+      }
+    }
+  ],
+  "version": "2.0.0"
+}
