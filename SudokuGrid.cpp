@@ -20,6 +20,7 @@ bool isBSubsetOfA(std::vector<int> vecSet, std::vector<int> vecPossibleSubset) {
 
 void SudokuGrid::Init(std::vector<std::vector<int>> vec)
 {
+    setEmptyBlockCharacter(DEFAULT_EMPTY_BLOCK_CHAR);
     for(int i = 0; i < 9; i++) {
         _grid.push_back(std::vector<Block>());
         for(int j = 0; j < 9; j++) {
@@ -57,6 +58,16 @@ SudokuGrid::SudokuGrid(std::string filePath) {
         }
     }
     Init(vec);
+}
+
+char SudokuGrid::getEmptyBlockCharacter()
+{
+    return _emptyBlockCharacter;
+}
+
+void SudokuGrid::setEmptyBlockCharacter(char emptyBlockCharacter)
+{
+    _emptyBlockCharacter = emptyBlockCharacter;
 }
 
 int SudokuGrid::getValueAtBlock(int row, int col)
@@ -402,20 +413,6 @@ void SudokuGrid::setPossibleValuesBasedOnAdjacent(int row, int col)
 
         setPossibleValuesAtBlock(row, col, possibleValues);
 
-        #ifdef _DEBUG
-        std::cout << "Possible Values for (row=" << row << ",col=" << col << ",val=" << getValueAtBlock(row, col) << "): ";
-        for(int i = 0; i < possibleValues.size(); i++) {
-            std::cout << possibleValues[i] << " ";
-        }
-        // std::cout << std::endl;
-        #endif
-
-    } else {
-        #ifdef _DEBUG
-        std::cout << "Value is locked ";
-        displayPossibleValuesAtBlock(row ,col);
-        // std::cout << "(row=" << row << ",col=" << col << ",val=" << getValueAtBlock(row, col) << ")" << std::endl;
-        #endif
     }
 }
 
@@ -533,26 +530,68 @@ void SudokuGrid::fillBlocksBasedOnPossibleValues()
 
 void SudokuGrid::displayGrid()
 {
-    int row = 9;
-    int col = 9;
+    // int row = 9;
+    // int col = 9;
+    bool showRowsAndColumns;
+    std::cout << "                   COLUMN\r\n";
+    std::cout << "       ";
+    for(int i = 0; i < GRID_COL_COUNT; i++) {
+        std::cout << "[" << i + 1 << "]";
+        if(i%3 == 2) std::cout << " ";
+    }
+    std::cout << "\r\n";
+    std::cout << std::string(8,' ');
+    for(int iStr = 0; iStr < 27; iStr++) {
+        std::cout << "—";
+    }
+    std::cout << "\r\n";
+    for(int i = 0; i < GRID_ROW_COUNT; i++){ 
+        if(i == 3) {
+            std::cout << "R ";
+        }
+        else if(i == 4) {
+            std::cout << "O ";
+        }
+        else if(i == 5) {
+            std::cout << "W ";
+        } else {
+            std::cout << "  ";
+        }
+        std::cout << "[" << i + 1 << "]  |";
 
-    for(int i = 0; i < row; i++){ 
-        for(int j = 0; j < col; j++) {
+        for(int j = 0; j < GRID_COL_COUNT; j++) {
             if(getValueAtBlock(i,j) > 0) {
                 std::cout << getValueAtBlock(i,j);
             } else {
-                std::cout << "#";
+                std::cout << getEmptyBlockCharacter();
             }
-            if(j < row - 1){
+            if(j != GRID_COL_COUNT - 1){
                 std::cout << " ";
-                if(j%3 == 2) std::cout << " ";
+                if(j%3 == 2) std::cout << "| ";
+                else std::cout << " ";
+            } else {
+                std::cout << "|";
             }
         }
-        if( i!= 8) {
-            std::cout << std::endl;
+        if( i!= GRID_ROW_COUNT - 1) {
+            if(i%3 == 2) {
+                std::cout << std::endl;
+                std::cout << "       |" << std::string();
+                for(int iStr = 0; iStr < 27; iStr++) {
+                    std::cout << "—";
+                }
+                std::cout << "|";
+            }
+            std::cout << "\r\n";
+        } else {
+            std::cout << "\r\n";
+            std::cout << "        " << std::string();
+            for(int iStr = 0; iStr < 27; iStr++) {
+                std::cout << "—";
+            }
         }
-        if(i%3 == 2) std::cout << std::endl;
     }
+    std::cout << "\r\n";
 }
 
 int SudokuGrid::solveGrid()
@@ -583,12 +622,13 @@ int SudokuGrid::solveGrid()
     }
 
     if(isSolved()) {
+        return 0;
         // std::cout << "SOLVED AFTER " << scanCount << " SCANS!" << std::endl;
         // displayGrid();
     } else {
         #ifdef _DEBUG
         std::cout << "NOT SOLVED AFTER " << scanCount << " SCANS..." << std::endl;
-        displaySolvedBlockCount();
+        displaySolvedBlockCount();so
         displayGrid();
         displayAllPossibleValues(SQUARE);
         std::cout << "Attempting extra algorithms...\r\n";
@@ -618,15 +658,18 @@ int SudokuGrid::solveGrid()
             if(isSolved()) break;
         }
         if(isSolved()) {
+            return 0;
             // std::cout << "Solved!\r\n";
         } else {
+            return -1;
             // std::cout << "Not solved after " << scanCount << " attempts...\r\n";
         }
         // displaySolvedBlockCount();
         // displayGrid();
         // displayAllPossibleValues(SQUARE);
     }
-    return 0;
+    // Should not return here
+    return -1;
 }
 
 std::vector<std::vector<int>> SudokuGrid::hardCodedPuzzle()

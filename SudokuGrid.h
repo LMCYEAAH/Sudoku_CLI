@@ -10,6 +10,7 @@
 #define GRID_ROW_COUNT 9
 #define GRID_COL_COUNT 9
 #define GRID_SQUARE_COUNT 9
+#define DEFAULT_EMPTY_BLOCK_CHAR '-'
 
 enum displayByEnum {
     ROW,
@@ -25,6 +26,8 @@ class SudokuGrid {
                             SudokuGrid(std::string filePath);
         void                displayPossibleValuesAtBlock(int row, int col);
         void                displayAllPossibleValues(displayByEnum displayBy);
+        char                getEmptyBlockCharacter();
+        void                setEmptyBlockCharacter(char emptyBlockCharacter);
         void                displayGrid();
         int                 solveGrid();
         bool                isSolved();
@@ -32,16 +35,17 @@ class SudokuGrid {
         bool                isBlockValid(int row, int col);
         int                 solvedBlockCount();
         void                displaySolvedBlockCount();
-    private:
-        std::vector<std::vector<Block>> _grid;
         int                 getValueAtBlock(int row, int col);
         int                 setValueAtBlock(int row, int col, int val);
         bool                validateRowAtBlock(int row, int col);
         bool                validateColAtBlock(int row, int col);
         bool                validateSquareAtBlock(int row, int col);
-        void                setPossibleValuesBasedOnAdjacent(int row, int col);
         std::vector<int>    getPossibleValuesAtBlock(int row, int col);
         void                setPossibleValuesAtBlock(int row, int col, std::vector<int> vec);
+    private:
+        std::vector<std::vector<Block>> _grid;
+        char                _emptyBlockCharacter;
+        void                setPossibleValuesBasedOnAdjacent(int row, int col);
         void                isolateUncommonPossibleValueAtRow(int row);
         void                isolateUncommonPossibleValueAtColumn(int col);
         void                isolateUncommonPossibleValueAtSquare(int square);
