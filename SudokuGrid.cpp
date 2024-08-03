@@ -559,10 +559,10 @@ int SudokuGrid::solveGrid()
 {
     int scanCount = 0;
 
-    std::cout << "BEFORE\r\n";
-    displaySolvedBlockCount();
-    displayGrid();
-    std::cout << std::endl;
+    // std::cout << "BEFORE\r\n";
+    // displaySolvedBlockCount();
+    // displayGrid();
+    // std::cout << std::endl;
     int prevSolvedCount = -1;
     while(scanCount < MAX_SCAN_COUNT) {
         if(prevSolvedCount == solvedBlockCount()) {
@@ -583,8 +583,8 @@ int SudokuGrid::solveGrid()
     }
 
     if(isSolved()) {
-        std::cout << "SOLVED AFTER " << scanCount << " SCANS!" << std::endl;
-        displayGrid();
+        // std::cout << "SOLVED AFTER " << scanCount << " SCANS!" << std::endl;
+        // displayGrid();
     } else {
         #ifdef _DEBUG
         std::cout << "NOT SOLVED AFTER " << scanCount << " SCANS..." << std::endl;
@@ -618,13 +618,13 @@ int SudokuGrid::solveGrid()
             if(isSolved()) break;
         }
         if(isSolved()) {
-            std::cout << "Solved!\r\n";
+            // std::cout << "Solved!\r\n";
         } else {
-            std::cout << "Not solved after " << scanCount << " attempts...\r\n";
+            // std::cout << "Not solved after " << scanCount << " attempts...\r\n";
         }
-        displaySolvedBlockCount();
-        displayGrid();
-        displayAllPossibleValues(SQUARE);
+        // displaySolvedBlockCount();
+        // displayGrid();
+        // displayAllPossibleValues(SQUARE);
     }
     return 0;
 }

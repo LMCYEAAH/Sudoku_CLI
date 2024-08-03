@@ -1,31 +1,14 @@
 #include <iostream>
-#include <vector>
-
-#include "SudokuGrid.h"
-#include <fstream>
+#include "StateMachine.h"
 
 
-void displayVector(std::vector<int> vec);
 
 int main() {
-    // Hardcoding sudoku puzzle
-    SudokuGrid newGrid;
 
-    // By file
-    SudokuGrid gridFile("puzzles/puzzle3(Hard).txt");
-
-
-
-     gridFile.solveGrid();
+    StateMachine sm;
+    sm.start();
     return 0;
-}
-
-
-void displayVector(std::vector<int> vec)
-{
-    int vecSize = vec.size();
-    for(int i = 0; i < vecSize; i++) {
-        std::cout << vec[i] << " ";
-    }
-    std::cout << std::endl;
+    // Game changer
+    // std::cout << "\033[1;31mbold red text\033[0m\n";
+    return 0;
 }
