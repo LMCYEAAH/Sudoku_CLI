@@ -18,15 +18,26 @@ bool isBSubsetOfA(std::vector<int> vecSet, std::vector<int> vecPossibleSubset) {
     return commonCount == subSize ? true : false;
 }
 
+bool SudokuGrid::isGridInitialized()
+{
+    return _initialized;
+}
+
+void SudokuGrid::setInitialized(bool val)
+{
+    _initialized = val;
+}
+
 void SudokuGrid::Init(std::vector<std::vector<int>> vec)
 {
-    setEmptyBlockCharacter(DEFAULT_EMPTY_BLOCK_CHAR);
+    // setEmptyBlockCharacter(DEFAULT_EMPTY_BLOCK_CHAR);
     for(int i = 0; i < 9; i++) {
         _grid.push_back(std::vector<Block>());
         for(int j = 0; j < 9; j++) {
             _grid[i].push_back(Block(vec[i][j]));
         }
     }
+    setInitialized(true);
 }
 
 SudokuGrid::SudokuGrid()
@@ -95,17 +106,62 @@ bool SudokuGrid::isBlockLocked(int row, int col)
     return _grid[row][col].isLocked();
 }
 
-bool SudokuGrid::validateRowAtBlock(int row, int col)
+bool SudokuGrid::validateBlockAtRow(int row, int col)
+{
+    if(isBlockLocked(row,col)) return true;
+    if(getValueAtBlock(row,col) == 0) return false;
+    for(int i = 0; i < GRID_COL_COUNT; i++) {
+        if(i == col) continue;
+        if(getValueAtBlock(row,i) == getValueAtBlock(row,col)) return false;
+    }
+    return true;
+}
+
+bool SudokuGrid::validateBlockAtColumn(int row, int col)
+{
+    if(isBlockLocked(row,col)) return true;
+    if(getValueAtBlock(row,col) == 0) return false;
+    for(int i = 0; i < GRID_ROW_COUNT; i++) {
+        if(i == row) continue;
+        if(getValueAtBlock(i,col) == getValueAtBlock(row,col)) return false;
+    }
+    return true;
+}
+
+bool SudokuGrid::validateBlockAtSquare(int row, int col)
+{
+            // Check Square
+        int squareRow, squareCol;
+        if(row < 3) { squareRow = 0; }
+        else if(row < 6) { squareRow = 3; }
+        else { squareRow = 6; }
+
+        if(col < 3) { squareCol = 0; }
+        else if(col < 6) { squareCol = 3; }
+        else { squareCol = 6; }
+
+    if(isBlockLocked(row,col)) return true;
+    if(getValueAtBlock(row,col) == 0) return false;
+    for(int i = squareRow; i < squareRow + 3; i++) {
+        for(int j = squareCol; j < squareCol + 3; j++) {
+            if(i == row && j == col) continue;
+            if(getValueAtBlock(i,j) == getValueAtBlock(row,col)) return false;
+        }
+    }
+    return true;
+}
+
+bool SudokuGrid::validateRow(int row)
 {
     return true;
 }
 
-bool SudokuGrid::validateColAtBlock(int row, int col)
+bool SudokuGrid::validateColumn(int col)
 {
     return true;
 }
 
-bool SudokuGrid::validateSquareAtBlock(int row, int col)
+bool SudokuGrid::validateSquare(int square)
 {
     return true;
 }
@@ -113,8 +169,11 @@ bool SudokuGrid::validateSquareAtBlock(int row, int col)
 
 bool SudokuGrid::isBlockValid(int row, int col)
 {
-    if(isBlockLocked(row, col) || getPossibleValuesAtBlock(row, col).size() == 1) return true;
-    else return false;
+    if(isBlockLocked(row, col)) return true;
+    if(!validateBlockAtRow(row,col)) return false;
+    if(!validateBlockAtColumn(row,col)) return false;
+    if(!validateBlockAtSquare(row,col)) return false;
+    return true;
 }
 
 bool SudokuGrid::isSolved()

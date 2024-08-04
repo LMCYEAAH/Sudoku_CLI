@@ -37,14 +37,20 @@ class SudokuGrid {
         void                displaySolvedBlockCount();
         int                 getValueAtBlock(int row, int col);
         int                 setValueAtBlock(int row, int col, int val);
-        bool                validateRowAtBlock(int row, int col);
-        bool                validateColAtBlock(int row, int col);
-        bool                validateSquareAtBlock(int row, int col);
+        bool                validateBlockAtRow(int row, int col);
+        bool                validateBlockAtColumn(int row, int col);
+        bool                validateBlockAtSquare(int row, int col);
+        bool                validateRow(int row);
+        bool                validateColumn(int col);
+        bool                validateSquare(int square);
         std::vector<int>    getPossibleValuesAtBlock(int row, int col);
         void                setPossibleValuesAtBlock(int row, int col, std::vector<int> vec);
+        bool                isGridInitialized();
+        void                setInitialized(bool val);
     private:
         std::vector<std::vector<Block>> _grid;
-        char                _emptyBlockCharacter;
+        bool                _initialized = false;
+        char                _emptyBlockCharacter = '-';
         void                setPossibleValuesBasedOnAdjacent(int row, int col);
         void                isolateUncommonPossibleValueAtRow(int row);
         void                isolateUncommonPossibleValueAtColumn(int col);
