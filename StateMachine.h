@@ -55,6 +55,7 @@ class StateMachine {
         void         pushPreviousState(sudoku_state state);
         sudoku_state popPreviousState();
         void         displayInfoBar();
+        void         displayScreenBar(sudoku_state state);
         void         displayMessageBar();
         void         displayMenu(sudoku_state state);
         sudoku_category getCategory();

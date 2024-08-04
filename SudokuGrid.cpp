@@ -528,34 +528,35 @@ void SudokuGrid::fillBlocksBasedOnPossibleValues()
     }
 }
 
-void SudokuGrid::displayGrid()
+void SudokuGrid::displayGrid(int indent)
 {
+    if(indent < 0) indent = 0;
     // int row = 9;
     // int col = 9;
     bool showRowsAndColumns;
-    std::cout << "                   COLUMN\r\n";
-    std::cout << "       ";
+    std::cout << std::string(indent,' ') << "                   COLUMN\r\n";
+    std::cout << std::string(indent,' ') << "       ";
     for(int i = 0; i < GRID_COL_COUNT; i++) {
         std::cout << "[" << i + 1 << "]";
         if(i%3 == 2) std::cout << " ";
     }
     std::cout << "\r\n";
-    std::cout << std::string(8,' ');
+    std::cout << std::string(indent,' ') << std::string(8,' ');
     for(int iStr = 0; iStr < 27; iStr++) {
         std::cout << "—";
     }
     std::cout << "\r\n";
     for(int i = 0; i < GRID_ROW_COUNT; i++){ 
         if(i == 3) {
-            std::cout << "R ";
+            std::cout << std::string(indent,' ') << "R ";
         }
         else if(i == 4) {
-            std::cout << "O ";
+            std::cout << std::string(indent,' ') << "O ";
         }
         else if(i == 5) {
-            std::cout << "W ";
+            std::cout << std::string(indent,' ') << "W ";
         } else {
-            std::cout << "  ";
+            std::cout << std::string(indent,' ') << "  ";
         }
         std::cout << "[" << i + 1 << "]  |";
 
@@ -576,7 +577,7 @@ void SudokuGrid::displayGrid()
         if( i!= GRID_ROW_COUNT - 1) {
             if(i%3 == 2) {
                 std::cout << std::endl;
-                std::cout << "       |" << std::string();
+                std::cout << std::string(indent,' ') << "       |" << std::string();
                 for(int iStr = 0; iStr < 27; iStr++) {
                     std::cout << "—";
                 }
@@ -585,7 +586,7 @@ void SudokuGrid::displayGrid()
             std::cout << "\r\n";
         } else {
             std::cout << "\r\n";
-            std::cout << "        " << std::string();
+            std::cout << std::string(indent,' ') << "        " << std::string();
             for(int iStr = 0; iStr < 27; iStr++) {
                 std::cout << "—";
             }

@@ -28,7 +28,7 @@ class SudokuGrid {
         void                displayAllPossibleValues(displayByEnum displayBy);
         char                getEmptyBlockCharacter();
         void                setEmptyBlockCharacter(char emptyBlockCharacter);
-        void                displayGrid();
+        void                displayGrid(int indent);      //todo add indentation argument
         int                 solveGrid();
         bool                isSolved();
         bool                isBlockLocked(int row, int col);

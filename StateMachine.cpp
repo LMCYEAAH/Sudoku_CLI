@@ -144,17 +144,99 @@ void StateMachine::clearScreen()
 
 void StateMachine::displayMessageBar()
 {
-    std::cout << std::string(40,'-') << std::endl;
+    std::cout << std::string(80,'-') << std::endl;
     std::cout << "Output: " << getMessageBuffer() << std::endl;
-    std::cout << std::string(40,'-') << std::endl;
+    std::cout << std::string(80,'-') << std::endl;
+}
+
+void StateMachine::displayScreenBar(sudoku_state state)
+{
+    std::string screenStr;
+    switch(state)
+    {
+        case SUDOKU_START_SCREEN:
+        {
+            screenStr = "Sudoku for Terminal! (LMC 2024)";
+            break;
+        }
+        case SUDOKU_PLAY_SCREEN:
+        {
+            if(!getSudokuGrid()->isSolved()) {
+                screenStr = "Solve the puzzle.";
+            }
+            else {
+                screenStr = "Congratulations! Puzzle solved!";
+            }
+            break;
+        }
+        case SUDOKU_CATEGORY_SELECT_SCREEN:
+        {
+            screenStr = "Select Difficulty";
+            break;
+        }
+        case SUDOKU_PUZZLE_SELECT_SCREEN:
+        {
+            screenStr = "Select Puzzle Number";
+            break;
+        }
+        case SUDOKU_OPTIONS_SCREEN:
+        {
+            screenStr = "Configure Options";
+            break;
+        }
+        case SUDOKU_LIST_SCREEN:
+        {
+            screenStr = "Command List";
+            sudoku_state prevState = _previousStates.top();
+            switch(prevState)
+            {
+                case SUDOKU_PLAY_SCREEN:
+                {
+                    screenStr = "Sudoku " + screenStr;
+                    break;
+                }
+                case SUDOKU_OPTIONS_SCREEN:
+                {
+                    screenStr = "Options " + screenStr;
+                    break;
+                }
+                case SUDOKU_PUZZLE_SELECT_SCREEN:
+                {
+                    screenStr = "Puzzle Select " + screenStr;
+                    break;
+                }
+                case SUDOKU_CATEGORY_SELECT_SCREEN:
+                {
+                    screenStr = "Difficulty Select " + screenStr;
+                    break;
+                }
+            }
+            break;
+        }
+        case SUDOKU_HELP_SCREEN:
+        {
+            if(_previousStates.top() == SUDOKU_PLAY_SCREEN) {
+                    screenStr = "Sudoku Rules";
+            }
+            break;
+        }
+        case SUDOKU_END_SCREEN:
+        {
+            screenStr = "See You Later";
+            break;
+        }
+    }
+    int screenStrSize = screenStr.size();
+    std::cout << std::string(40 - (screenStrSize / 2) - (screenStrSize%2 == 1 ? 1 : 0),'-') << screenStr << std::string(40 - (screenStr.size() / 2),'-') << std::endl;
+
 }
 
 void StateMachine::displayInfoBar()
 {
-    std::cout << std::string(40,'-') << std::endl;
+    std::cout << std::string(80,'-') << std::endl;
     std::cout << "Difficulty: " << getCategoryString();
-    std::cout << std::string(15 - getCategoryString().size(),' ') + "Puzzle: " << getPuzzleNumber() << "/10" << std::endl;
-    std::cout << std::string(40,'-') << std::endl;
+    std::cout << std::string(23 - getCategoryString().size(),' ') + "[SUDOKU]" + std::string(27 - (getPuzzleNumber() > 9 ? 1 : 0) - (getPuzzleNumber() > 99 ? 1 : 0), ' ') + "Puzzle: " << getPuzzleNumber() << std::endl;
+    std::cout << std::string(80,'-') << std::endl;
 }
 void StateMachine::displayMenu(sudoku_state state)
 {
@@ -165,96 +247,109 @@ void StateMachine::displayMenu(sudoku_state state)
         case SUDOKU_START_SCREEN:
         {
             if(true) displayInfoBar();
-            std::cout << "    Welcome to Sudoku for Terminal!\r\n";
+            if(true) displayScreenBar(SUDOKU_START_SCREEN);
             std::cout << "1) Play Sudoku\r\n"
                         << "2) Change Difficulty\r\n"
                         << "3) Select Puzzle or Randomize\r\n"
                         << "4) Options\r\n"
                         << "5) Exit\r\n";
-            padScreen(2);
+            padScreen(13);
+            std::cout << "Please select one of the following.\r\n";
+            if(true) displayMessageBar();
             break;
         }
         case SUDOKU_PLAY_SCREEN:
         {
             if(true) displayInfoBar();
-            getSudokuGrid()->displayGrid();
-            // padScreen(getScreenSize() >> 3);
-            // std::cout << "1) Set Block   2) Load   3) Save\r\n";
-            // std::cout << "4) Solve       5) Reset  6) Main Menu\r\n";
-            // std::cout << "Output: " << getMessageBuffer() << std::endl;
-            if(true) displayMessageBar();
-            std::cout << "For a list of commands, enter 'list'.\r\n";
-            std::cout << "For Sudoku Rules, enter 'help'.\r\n";
+            if(true) displayScreenBar(SUDOKU_PLAY_SCREEN);
+            padScreen(1);
+            getSudokuGrid()->displayGrid(20);
+            padScreen(1);
+            std::cout << "For a list of commands, enter 'list'. For Sudoku Rules, enter 'help'.\r\n";
             std::cout << "To return to main menu, enter 'back'.\r\n";
+            if(true) displayMessageBar();
             break; 
         }
         case SUDOKU_CATEGORY_SELECT_SCREEN:
         {
             if(true) displayInfoBar();
+            if(true) displayScreenBar(SUDOKU_CATEGORY_SELECT_SCREEN);
             std::cout << "1) Easy\r\n";
             std::cout << "2) Medium\r\n";
             std::cout << "3) Hard\r\n";
             std::cout << "4) Expert\r\n";
             std::cout << "5) Master\r\n";
             std::cout << "6) Extreme\r\n";
-            padScreen(getScreenSize() >> 2);
-            if(true) displayMessageBar();
-            std::cout << "To choose difficulty, enter the corresponding number shown above (1-6).\r\n";
+            padScreen(10);
+            std::cout << "Enter a number between 1 and 6,\r\n";
+            std::cout << "or enter the difficulty value (e.g., 'easy').\r\n";
             std::cout << "To go back, enter 'back'\r\n";
+            if(true) displayMessageBar();
             break;
         }
         case SUDOKU_PUZZLE_SELECT_SCREEN:
         {
             if(true) displayInfoBar();
+            if(true) displayScreenBar(SUDOKU_PUZZLE_SELECT_SCREEN);
             // List puzzles
-            std::cout << "Placeholder puzzle list";
-            padScreen(10);
-            if(true) displayMessageBar();
+            std::cout << "Enter value between 1 and 100.\r\n";
+            padScreen(17);
             std::cout << "To return to main menu, enter 'back'.\r\n";
+            if(true) displayMessageBar();
             break;
         }
         case SUDOKU_HELP_SCREEN:
         {
             if(true) displayInfoBar();
+            if(true) displayScreenBar(SUDOKU_HELP_SCREEN);
             std::cout << "In classic Sudoku, the objective is to fill a 9 × 9 grid with digits\r\n"
                         << "so that each column, each row, and each of the nine 3 × 3 subgrids\r\n"
                         << "that compose the grid contains all of the digits from 1 to 9. The\r\n"
                         << "puzzle setter provides a partially completed grid,\r\n"
                         << "which for a well-posed puzzle has a single solution.\r\n";
-            padScreen(getScreenSize() >> 2);
-            // std::cout << "Output: " << getMessageBuffer() << std::endl;
-            if(true) displayMessageBar();
+            padScreen(13);
             std::cout << "To go back, enter 'back'.\r\n";
+            if(true) displayMessageBar();
             break;
         }
         case SUDOKU_LIST_SCREEN:
         {
             if(true) displayInfoBar();
-            std::cout << std::string(10,'-')
-                        << "List of Commands"
-                        << std::string(10,'-') << "\r\n";
-            std::cout << "reset" + std::string(15 - 5,' ') + "resets puzzle to initial state";
-            padScreen(getScreenSize() >> 2);
+            if(true) displayScreenBar(SUDOKU_LIST_SCREEN);
+            std::cout << "list" + std::string(30 - 4,' ') + "lists commands for interacting with Sudoku puzzle\r\n";
+            std::cout << "fill  [row],[column] [value]" + std::string(30 - 28,' ') + "fills grid with [value] (1-9) at specified [row] and [column].\r\n";
+            std::cout << "clear [row],[column]" + std::string(30 - 20,' ') + "erases grid value at specified [row] and [column].\r\n";
+            std::cout << "note  [row],[column] [value]" + std::string(30 - 28,' ') + "adds/removes possible [value] to grid at specified [row] and [column].\r\n";
+            std::cout << "show  [row],[column]" + std::string(30 - 20,' ') + "outputs user-noted possible values from grid at specified [row] and [column].\r\n";
+            std::cout << "reset" + std::string(30 - 5,' ') + "resets puzzle to initial state\r\n";
+            std::cout << "load" + std::string(30 - 4,' ') + "Loads save file from previous session.\r\n";
+            std::cout << "save" + std::string(30 - 4,' ') + "Saves state of current Sudoku Grid.\r\n";
+            padScreen(11);
             if(true) displayMessageBar();
             break;
         }
         case SUDOKU_OPTIONS_SCREEN:
         {
             if(true) displayInfoBar();
-            std::cout << "Options screen placeholder";
-            padScreen(getScreenSize() >> 1);
+            if(true) displayScreenBar(SUDOKU_OPTIONS_SCREEN);
+            std::cout << "Options screen placeholder\r\n";
+            padScreen(18);
             if(true) displayMessageBar();
             break;
         }
         case SUDOKU_END_SCREEN:
     {
-        std::cout << "Thanks for Playing!";
-        padScreen(getScreenSize() >> 1);
+        if(true) displayInfoBar();
+        if(true) displayScreenBar(SUDOKU_END_SCREEN);
+        padScreen(10);
+        std::cout << std::string(40 - 10,' ') << "Thanks for Playing!" << std::string(40 - 9,' ');
+        padScreen(12);
         break;
     }
     }
 }
 
+// todo define terminal size (seems to be width: 80 characters, height: 26 lines)
 
 void promptForValidInput(sudoku_state state)
 {
@@ -296,13 +391,15 @@ void StateMachine::setSodukuGrid(std::string filePath)
     _grid = new SudokuGrid(filePath);
 }
 
+//todo play command, list in main menu
 void StateMachine::commandInterpreter(sudoku_state state)
 {
+    std::string msg;
     switch(state)
     {
         case SUDOKU_START_SCREEN:
         {
-            _commandBuffer = toUpper(getInput("Please select one of the following.\r\nEnter number (1-5): "));
+            _commandBuffer = toUpper(getInput("Enter number or command: "));
             if(_commandBuffer == "1") {
                 setNewState(SUDOKU_PUZZLE_INIT,false);
             }
@@ -375,6 +472,54 @@ void StateMachine::commandInterpreter(sudoku_state state)
                     // set value on grid
                     setMessageBuffer(_inputBuffer);
                 }
+                else if(_commandBuffer[0] == 'F') {
+                    if(_commandBuffer.size() == 4) {
+                        for(int i = 0; i < 3; i++) {
+                            if(!isdigit(_commandBuffer[1 + i])) {
+                                setMessageBuffer("Invalid input");
+                            }
+                        }
+                        int row = _commandBuffer[1] - '0';
+                        int col = _commandBuffer[2] - '0';
+                        int val = _commandBuffer[3] - '0';
+                        if(row == 0 || col == 0 || val == 0) {
+                            setMessageBuffer("Invalid input");
+                            break;
+                        }
+                        row--;
+                        col--;
+
+                        getSudokuGrid()->setValueAtBlock(row,col,val);
+                        row++;
+                        col++;
+
+                        setMessageBuffer(_inputBuffer);
+                    }
+                }
+                else if(_commandBuffer[0] == 'C') {
+                    if(_commandBuffer.size() == 3) {
+                        for(int i = 0; i < 2; i++) {
+                            if(!isdigit(_commandBuffer[1 + i])) {
+                                setMessageBuffer("Invalid input");
+                            }
+                        }
+                        int row = _commandBuffer[1] - '0';
+                        int col = _commandBuffer[2] - '0';
+                        if(row == 0 || col == 0) {
+                            setMessageBuffer("Invalid input");
+                            break;
+                        }
+                        row--;
+                        col--;
+
+                        getSudokuGrid()->setValueAtBlock(row,col,0);
+                        row++;
+                        col++;
+                        // msg = "Value Cleared. (" + char(row + '0') + ',' + char(col + '0') + ')';
+                        // msg += " is empty";
+                        setMessageBuffer(_inputBuffer);
+                    }
+                }
                 else {
                     setMessageBuffer("'" + _inputBuffer + "' is an invalid Command.");
                 }
@@ -384,27 +529,27 @@ void StateMachine::commandInterpreter(sudoku_state state)
         {
             _commandBuffer = toUpper(getInput("Enter command: "));
 
-            if(_commandBuffer == "1") {
+            if(_commandBuffer == "1" || _commandBuffer == "EASY") {
                 setCategory(EASY);
                 setMessageBuffer("Easy difficulty selected.");
             }
-            else if(_commandBuffer == "2") {
+            else if(_commandBuffer == "2" || _commandBuffer == "MEDIUM") {
                 setCategory(MEDIUM);
                 setMessageBuffer("Medium difficulty selected.");
             }
-            else if(_commandBuffer == "3") {
+            else if(_commandBuffer == "3" || _commandBuffer == "HARD") {
                 setCategory(HARD);
                 setMessageBuffer("Hard difficulty selected.");
             }
-            else if(_commandBuffer == "4") {
+            else if(_commandBuffer == "4" || _commandBuffer == "EXPERT") {
                 setCategory(EXPERT);
                 setMessageBuffer("Expert difficulty selected.");
             }
-            else if(_commandBuffer == "5") {
+            else if(_commandBuffer == "5" || _commandBuffer == "MASTER") {
                 setCategory(MASTER);
                 setMessageBuffer("Master difficulty selected.");
             }
-            else if(_commandBuffer == "6") {
+            else if(_commandBuffer == "6" || _commandBuffer == "EXTREME") {
                 setCategory(EXTREME);
                 setMessageBuffer("Extreme difficulty selected.");
             }
@@ -419,18 +564,31 @@ void StateMachine::commandInterpreter(sudoku_state state)
         }
         case SUDOKU_PUZZLE_SELECT_SCREEN:
         {
-            _commandBuffer = toUpper(getInput("Enter Command: "));
+            
+            _commandBuffer = toUpper(getInput("Enter number or command: "));
             if(_commandBuffer == "BACK") {
                 setNewState(popPreviousState(),false);
             }
+            else if(_commandBuffer == "EXIT") {
+                setNewState(SUDOKU_END_SCREEN, true);
+            }
+            else if(isInteger(_commandBuffer)) {
+                int num = std::stoi(_commandBuffer);
+                if(num >= 1 && num <= 100) {
+                    setPuzzleNumber(num);
+                    setMessageBuffer("puzzle" + _commandBuffer + " (" + getCategoryString() + ") Selected.");
+                } else {
+                    setMessageBuffer("Invalid value. Enter a number between 1 and 100");
+                }
+            }
             else {
-                setMessageBuffer("'" + _inputBuffer + "' is an invalid Command.");
+                setMessageBuffer("'" + _inputBuffer + "' is an invalid value.");
             }
             break;
         }
         case SUDOKU_OPTIONS_SCREEN:
         {
-            _commandBuffer = toUpper(getInput("Enter Command: "));
+            _commandBuffer = toUpper(getInput("Enter command: "));
             if(_commandBuffer == "BACK") {
                 setNewState(popPreviousState(),false);
             }
