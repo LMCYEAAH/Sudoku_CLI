@@ -429,7 +429,8 @@ void StateMachine::commandInterpreter(sudoku_state state)
                 setNewState(SUDOKU_CATEGORY_SELECT_SCREEN,true);
             }
             else if(_commandBuffer == "3") {
-                setNewState(SUDOKU_PUZZLE_SELECT_SCREEN,true);
+                // setNewState(SUDOKU_PUZZLE_SELECT_SCREEN,true);
+                setMessageBuffer("Locked for now :)");
             }
             else if(_commandBuffer == "4") {
                 setNewState(SUDOKU_OPTIONS_SCREEN,true);
