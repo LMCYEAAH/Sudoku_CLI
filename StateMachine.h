@@ -48,16 +48,16 @@ void padScreen(int num);
 class StateMachine {
     public:
         StateMachine();
-        sudoku_state getCurrentState();
-        void setNewState(sudoku_state state, bool setPreviousState);
-        bool isColorEnabled();
-        void setColorEnabled(bool value);
-        void         pushPreviousState(sudoku_state state);
-        sudoku_state popPreviousState();
-        void         displayInfoBar();
-        void         displayScreenBar(sudoku_state state);
-        void         displayMessageBar();
-        void         displayMenu(sudoku_state state);
+        sudoku_state    getCurrentState();
+        void            setNewState(sudoku_state state, bool setPreviousState);
+        bool            isColorEnabled();
+        void            setColorEnabled(bool value);
+        void            pushPreviousState(sudoku_state state);
+        sudoku_state    popPreviousState();
+        void            displayInfoBar();
+        void            displayScreenBar(sudoku_state state);
+        void            displayMessageBar();
+        void            displayMenu(sudoku_state state);
         sudoku_category getCategory();
         void setCategory(sudoku_category category);
         int getPuzzleNumber();

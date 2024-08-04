@@ -3,7 +3,7 @@
 
 std::string toLower(std::string str);
 std::string toUpper(std::string str);
-bool contains(std::string str, std::string subStr);
+int contains(std::string str, std::string subStr);
 
 StateMachine::StateMachine()
 {
@@ -409,7 +409,7 @@ void StateMachine::setSodukuGrid(std::string filePath)
     _grid = new SudokuGrid(filePath);
 }
 
-//todo play command, list in main menu
+//todo list in main menu
 void StateMachine::commandInterpreter(sudoku_state state)
 {
     std::string msg;
@@ -478,19 +478,105 @@ void StateMachine::commandInterpreter(sudoku_state state)
                 else if(_commandBuffer == "UNDO") {
                     setMessageBuffer("Undo Under Construction :)");
                 }
-                else if(contains(_commandBuffer,"FILL")) {
+                else if(contains(_commandBuffer,"FILL") >= 0) {
                     // set value on grid
-                    setMessageBuffer(_inputBuffer);
+
+                    msg = getMessageBuffer();
+                    int findIndex = _commandBuffer.find(' ');
+                    while(findIndex >= 0) {
+                        _commandBuffer.erase(findIndex, 1);
+                        findIndex = _commandBuffer.find(' ');
+                    }
+                    // Verify command structure was followed
+                    if(_commandBuffer.size() == 8) {
+                        // FILL[r],[c][v] or FILL[v][r],[c]
+                        int commaIndex = _commandBuffer.find(',');
+                        if(commaIndex == 5 || commaIndex == 6) {
+                            int valIndex = (commaIndex == 5) ? 7 : 4;
+                            
+                            std::string rowStr = std::string(1,_commandBuffer[commaIndex - 1]);
+                            std::string colStr = std::string(1,_commandBuffer[commaIndex + 1]);
+                            std::string valStr = std::string(1,_commandBuffer[valIndex]);
+
+                            int row = 0,col = 0,val = 0;
+                            if(isdigit(rowStr[0])) row = rowStr[0] - '0';
+                            if(isdigit(colStr[0])) col = colStr[0] - '0';
+                            if(isdigit(valStr[0])) val = valStr[0] - '0';
+
+                            if(row < 1 || col < 1 || val < 1) {
+                                msg = "Invalid operands: '" + _inputBuffer + "'";
+                            } else {
+                                // todo error codes for sudoku set functions (wrong file to put note here i guess)
+
+                                //Translating row and col to 0-indexed
+                                row--;
+                                col--;
+                                getSudokuGrid()->setValueAtBlock(row,col,val);
+                                msg = "Number " + valStr + " set at (Row:" + rowStr + ", Column:" + colStr + ")"; 
+                            }
+                            
+                        } else {
+                            msg = "Invalid structure: '" + _inputBuffer + "'";
+                            // setMessageBuffer(msg);
+                        }
+
+                    }
+                    setMessageBuffer(msg);
                 }
-                else if(contains(_commandBuffer,"CLEAR")) {
+                else if(contains(_commandBuffer,"CLEAR") >= 0) {
                     // clear value on grid
-                    setMessageBuffer(_inputBuffer);
+                    msg = getMessageBuffer();
+                    int findIndex = _commandBuffer.find(' ');
+                    while(findIndex >= 0) {
+                        _commandBuffer.erase(findIndex, 1);
+                        findIndex = _commandBuffer.find(' ');
+                    }
+                    // Verify command structure was followed
+                    if(_commandBuffer.size() == 8) {
+                        // CLEAR[R],[C]
+                        // todo add option in config screen to reverse [r],[c] order to [c],[r]. same with similar commands
+
+                        int commaIndex = _commandBuffer.find(',');
+                        if(commaIndex == 6) {
+                            
+                            std::string rowStr = std::string(1,_commandBuffer[commaIndex - 1]);
+                            std::string colStr = std::string(1,_commandBuffer[commaIndex + 1]);
+                            std::string valStr;
+
+                            int row = 0,col = 0;
+                            if(isdigit(rowStr[0])) row = rowStr[0] - '0';
+                            if(isdigit(colStr[0])) col = colStr[0] - '0';
+
+                            if(row < 1 || col < 1) {
+                                msg = "Invalid operands: '" + _inputBuffer + "'";
+                            } else {
+                                // todo error codes for sudoku set functions (wrong file to put note here i guess)
+
+                                //Translating row and col to 0-indexed
+                                row--;
+                                col--;
+                                valStr = std::string(1,getSudokuGrid()->getValueAtBlock(row,col) + '0');
+                                if(!getSudokuGrid()->isBlockLocked(row, col)) {
+                                    getSudokuGrid()->setValueAtBlock(row, col, 0);
+                                    msg = "Number " + valStr + " cleared from (Row:" + rowStr + ", Column:" + colStr + ")"; 
+                                } else {
+                                    msg = "Cannot clear " + valStr + " from (Row:" + rowStr + ", Column:" + colStr + "); ";
+                                    msg += valStr + " is part of original puzzle";
+                                }
+                            }
+                        } else {
+                            msg = "Invalid structure: '" + _inputBuffer + "'";
+                            // setMessageBuffer(msg);
+                        }
+
+                    }
+                    setMessageBuffer(msg);
                 }
-                else if(contains(_commandBuffer,"NOTE")) {
+                else if(contains(_commandBuffer,"NOTE") >= 0) {
                     // set value on grid
                     setMessageBuffer(_inputBuffer);
                 }
-                else if(contains(_commandBuffer,"SHOW")) {
+                else if(contains(_commandBuffer,"SHOW") >= 0) {
                     // set value on grid
                     setMessageBuffer(_inputBuffer);
                 }
@@ -501,6 +587,10 @@ void StateMachine::commandInterpreter(sudoku_state state)
                                 setMessageBuffer("Invalid input");
                             }
                         }
+                        // Makes it so msg is easier to string together.
+                        std::string valStr = std::string(1,_commandBuffer[1]);
+                        std::string rowStr = std::string(1,_commandBuffer[1]);
+                        std::string colStr = std::string(1,_commandBuffer[1]);
                         int val = _commandBuffer[1] - '0';
                         int row = _commandBuffer[2] - '0';
                         int col = _commandBuffer[3] - '0';
@@ -515,7 +605,9 @@ void StateMachine::commandInterpreter(sudoku_state state)
                         row++;
                         col++;
 
-                        setMessageBuffer(_inputBuffer);
+                        msg = "(" + std::string(1,_commandBuffer[2]) + "," + std::string(1,_commandBuffer[3]) + ")";
+                        msg += "set to " + std::string(1,_commandBuffer[1]) + ".";
+                        setMessageBuffer(msg);
                     }
                 }
                 else if(_commandBuffer[0] == 'C') {
@@ -745,19 +837,23 @@ std::string toUpper(std::string str)
     return str;
 }
 
-bool contains(std::string str, std::string subStr)
+int contains(std::string str, std::string subStr)
 {
     int strSize = str.size();
     int subStrSize = subStr.size();
+    if(strSize < subStrSize) return -1;
     int matchCount = 0;
 
     for(int i = 0; i < strSize; i++) {
         if(str[i] == subStr[matchCount]) {
             matchCount++;
-            if(matchCount == subStrSize - 1) return true;
+            
+            //Return index of last character of the subStr contained in str.
+            if(matchCount == subStrSize - 1) return i;
         } else {
             matchCount = 0;
         }
     }
-    return false;
+    //Returns -1 if str does not contain subStr
+    return -1;
 }
