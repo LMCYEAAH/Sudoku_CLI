@@ -149,6 +149,7 @@ void StateMachine::displayMessageBar()
     std::cout << std::string(80,'-') << std::endl;
 }
 
+//todo figure out issue with weird screen buffer
 void StateMachine::displayScreenBar(sudoku_state state)
 {
     std::string screenStr;
@@ -227,7 +228,9 @@ void StateMachine::displayScreenBar(sudoku_state state)
         }
     }
     int screenStrSize = screenStr.size();
-    std::cout << std::string(40 - (screenStrSize / 2) - (screenStrSize%2 == 1 ? 1 : 0),'-') << screenStr << std::string(40 - (screenStr.size() / 2),'-') << std::endl;
+    // std::cout << std::string(40 - (screenStrSize / 2) - (screenStrSize%2 == 1 ? 1 : 0),'-') << screenStr << std::string(40 - (screenStr.size() / 2),'-') << std::endl;
+    std::cout << std::string(40 - (screenStrSize / 2) - (screenStrSize%2 == 1 ? 1 : 0),' ') << screenStr << std::string(40 - (screenStr.size() / 2),' ') << std::endl;
+    std::cout << std::string(80, '-') << std::endl;
 
 }
 
@@ -294,7 +297,7 @@ void StateMachine::displayMenu(sudoku_state state)
             // List puzzles
             std::cout << "Enter value between 1 and 100.\r\n";
             std::cout << "Puzzle number will automatically increment when current puzzle solved.\r\n";
-            std::cout << "Or enter 'random' to choose random puzzle";
+            std::cout << "Or enter 'random' to choose random puzzle\r\n";
             padScreen(15);
             std::cout << "To return to main menu, enter 'back'.\r\n";
             if(true) displayMessageBar();
@@ -316,18 +319,44 @@ void StateMachine::displayMenu(sudoku_state state)
         }
         case SUDOKU_LIST_SCREEN:
         {
-            if(true) displayInfoBar();
-            if(true) displayScreenBar(SUDOKU_LIST_SCREEN);
-            std::cout << "list" + std::string(30 - 4,' ') + "lists commands for interacting with Sudoku puzzle\r\n";
-            std::cout << "fill  [value] [row],[column]" + std::string(30 - 28,' ') + "fills grid with [value] (1-9) at specified [row] and [column].\r\n";
-            std::cout << "clear [row],[column]" + std::string(30 - 20,' ') + "erases grid value at specified [row] and [column].\r\n";
-            std::cout << "note  [value] [row],[column]" + std::string(30 - 28,' ') + "adds/removes possible [value] to grid at specified [row] and [column].\r\n";
-            std::cout << "show  [row],[column]" + std::string(30 - 20,' ') + "outputs user-noted possible values from grid at specified [row] and [column].\r\n";
-            std::cout << "reset" + std::string(30 - 5,' ') + "resets puzzle to initial state\r\n";
-            std::cout << "load" + std::string(30 - 4,' ') + "Loads save file from previous session.\r\n";
-            std::cout << "save" + std::string(30 - 4,' ') + "Saves state of current Sudoku Grid.\r\n";
-            padScreen(11);
-            if(true) displayMessageBar();
+            switch(_previousStates.top())
+            {
+                case SUDOKU_PLAY_SCREEN:
+                {
+                    if(true) displayInfoBar();
+                    if(true) displayScreenBar(SUDOKU_LIST_SCREEN);
+                    // padScreen(1);
+                    // std::cout << "list" << std::string(30 - 4,' ')                          << "Lists commands for interacting with Sudoku puzzle\r\n"; // Max Line refference
+                    // std::cout << "\r\n";
+                    std::cout << "fill  [value] [row],[column]" << std::string(30 - 28,' ') << "fills grid with [value] (1-9) at specified\r\n";
+                    std::cout << std::string(30,' ')                                        << "[row] and [column].\r\n";
+                    std::cout << "\r\n";
+
+                    std::cout << "clear [row],[column]" << std::string(30 - 20,' ')         << "erases grid value at specified [row] and [column]\r\n";
+                    std::cout << "\r\n";
+
+                    std::cout << "note  [value] [row],[column]" << std::string(30 - 28,' ') << "adds/removes possible [value] to grid at\r\n";
+                    std::cout << std::string(30, ' ')                                       << "specified [row] and [column].\r\n";
+                    std::cout << "\r\n";
+
+                    std::cout << "show  [row],[column]" << std::string(30 - 20,' ')         << "outputs user-noted possible values from grid at\r\n";
+                    std::cout << std::string(30,' ')                                        << " specified [row] and [column].\r\n";
+                    std::cout << "\r\n";
+
+                    std::cout << "reset" << std::string(30 - 5,' ')                         << "resets puzzle to initial state\r\n";
+                    std::cout << "\r\n";
+
+                    std::cout << "load" << std::string(30 - 4,' ')                          << "Loads save file from previous session.\r\n";
+                    std::cout << "\r\n";
+
+                    std::cout << "save" << std::string(30 - 4,' ')                          << "Saves state of current Sudoku Grid.\r\n";
+
+                    padScreen(3);
+                    if(true) displayMessageBar();
+                    break;
+                }
+            }
+
             break;
         }
         case SUDOKU_OPTIONS_SCREEN:
@@ -618,6 +647,9 @@ void StateMachine::commandInterpreter(sudoku_state state)
             _commandBuffer = toUpper(getInput("Enter Command: "));
             if(_commandBuffer == "BACK") {
                 setNewState(popPreviousState(),false);
+            }
+            else if(_commandBuffer == "EXIT") {
+                setNewState(SUDOKU_END_SCREEN,true);
             }
             else {
                 setMessageBuffer("'" + _inputBuffer + "' is an invalid Command.");
